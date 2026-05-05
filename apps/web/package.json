@@ -12,7 +12,7 @@
         },
         "cache": true,
         "inputs": ["default", "^default"],
-        "dependsOn": ["^build"]
+        "dependsOn": ["^build", "build"]
       }
     }
   },
