@@ -16,7 +16,7 @@ describe('page (Story 3.1) — initial render', () => {
     expect(screen.getByLabelText(/height/i)).toHaveValue(30);
   });
 
-  it('renders a canvas element (Story 3.2 wiring)', () => {
+  it('renders a canvas element', () => {
     render(<Index />);
     expect(screen.getByTestId('canvas')).toBeInTheDocument();
   });
@@ -28,7 +28,7 @@ describe('page (Story 3.1) — initial render', () => {
 });
 
 describe('page (Story 3.1) — resize integration', () => {
-  it('AC-3: applying 50×40 updates the canvas dimensions (CSS sized via grid × CELL_SIZE)', () => {
+  it('AC-3: applying 50×40 updates the canvas dimensions', () => {
     render(<Index />);
     fireEvent.change(screen.getByLabelText(/width/i), {
       target: { value: '50' },
@@ -71,17 +71,73 @@ describe('page (Story 3.2) — click toggles cells end-to-end', () => {
       __getEvents?: () => ReadonlyArray<RecordedEvent>;
     };
 
-    // First click toggles (0,0) alive — produces an alive fillRect on next render.
     act(() => {
       fireEvent.pointerDown(canvas, { clientX: 10, clientY: 10 });
     });
     const ctx = canvas.getContext('2d') as Recordable | null;
     const events = ctx?.__getEvents?.() ?? [];
-    // Cumulative recorded fillRect events should now include at least one alive fill
-    // beyond the initial background fill — i.e., at least 3 (initial-bg + post-toggle-bg + alive).
     const fillRectCount = events.filter(
       (e: RecordedEvent) => e.type === 'fillRect',
     ).length;
     expect(fillRectCount).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('page (Story 3.3) — Play/Pause/Step integration', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('AC-3: clicking Step when paused increments gen-count by 1', () => {
+    render(<Index />);
+    expect(screen.getByTestId('gen-count')).toHaveTextContent('0');
+    fireEvent.click(screen.getByRole('button', { name: /step/i }));
+    expect(screen.getByTestId('gen-count')).toHaveTextContent('1');
+  });
+
+  it('AC-4: Step button is disabled while running', () => {
+    render(<Index />);
+    fireEvent.click(screen.getByRole('button', { name: /play/i }));
+    expect(screen.getByRole('button', { name: /step/i })).toBeDisabled();
+  });
+
+  it('AC-1 + AC-2: clicking Play, advancing 200ms, then Pause → gen-count moves and stops', () => {
+    render(<Index />);
+    fireEvent.click(screen.getByRole('button', { name: /play/i }));
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    const after200 = Number(
+      screen.getByTestId('gen-count').textContent ?? '0',
+    );
+    expect(after200).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: /pause/i }));
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    const afterPause = Number(
+      screen.getByTestId('gen-count').textContent ?? '0',
+    );
+    expect(afterPause).toBe(after200);
+  });
+
+  it('Story 3.1 cross-check (AC-5): submitting GridSizeForm while running pauses and clears', () => {
+    render(<Index />);
+    fireEvent.click(screen.getByRole('button', { name: /play/i }));
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    fireEvent.change(screen.getByLabelText(/width/i), {
+      target: { value: '20' },
+    });
+    fireEvent.change(screen.getByLabelText(/height/i), {
+      target: { value: '20' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /apply/i }));
+    expect(screen.getByTestId('gen-count')).toHaveTextContent('0');
+    expect(screen.getByRole('button', { name: /play/i })).toBeInTheDocument();
   });
 });

@@ -11,7 +11,7 @@
  * from day one — Stories 3.2–3.5 *fill* cases, they never widen the union.
  */
 
-import { createGrid, toggleCell, type Grid } from '@cgol-scaffold/sim';
+import { createGrid, step, toggleCell, type Grid } from '@cgol-scaffold/sim';
 import {
   DEFAULT_DIM,
   DEFAULT_GEN_PER_SEC,
@@ -73,12 +73,26 @@ export function simulationReducer(
       if (action.y < 0 || action.y >= state.dimensions.height) return state;
       return { ...state, grid: toggleCell(state.grid, action.x, action.y) };
     }
-    // Implemented in story 3.3
     case 'play':
+      return state.running ? state : { ...state, running: true };
     case 'pause':
-    case 'tick':
-    case 'step':
-      return state;
+      return state.running ? { ...state, running: false } : state;
+    case 'tick': {
+      if (!state.running) return state;
+      return {
+        ...state,
+        grid: step(state.grid),
+        genCount: state.genCount + 1,
+      };
+    }
+    case 'step': {
+      if (state.running) return state;
+      return {
+        ...state,
+        grid: step(state.grid),
+        genCount: state.genCount + 1,
+      };
+    }
     // Implemented in story 3.4
     case 'clear':
     case 'randomize':

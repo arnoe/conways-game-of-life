@@ -144,13 +144,61 @@ describe('simulationReducer — toggleCell action (Story 3.2)', () => {
   });
 });
 
+describe('simulationReducer — play/pause (Story 3.3)', () => {
+  it('AC-1: dispatching play when running=false sets running=true', () => {
+    const next = simulationReducer(INITIAL_STATE, { type: 'play' });
+    expect(next.running).toBe(true);
+  });
+
+  it('dispatching play when already running returns state unchanged (no-op)', () => {
+    const running = { ...INITIAL_STATE, running: true };
+    expect(simulationReducer(running, { type: 'play' })).toBe(running);
+  });
+
+  it('AC-2: dispatching pause when running=true sets running=false', () => {
+    const running = { ...INITIAL_STATE, running: true };
+    const next = simulationReducer(running, { type: 'pause' });
+    expect(next.running).toBe(false);
+  });
+
+  it('dispatching pause when already paused returns state unchanged', () => {
+    expect(simulationReducer(INITIAL_STATE, { type: 'pause' })).toBe(
+      INITIAL_STATE,
+    );
+  });
+});
+
+describe('simulationReducer — tick (Story 3.3)', () => {
+  it('AC-1: dispatching tick when running advances grid via step() and increments genCount', () => {
+    const running = { ...INITIAL_STATE, running: true };
+    const next = simulationReducer(running, { type: 'tick' });
+    expect(next.genCount).toBe(1);
+    expect(next.grid).not.toBe(running.grid);
+  });
+
+  it('dispatching tick when paused returns state unchanged', () => {
+    expect(simulationReducer(INITIAL_STATE, { type: 'tick' })).toBe(
+      INITIAL_STATE,
+    );
+  });
+});
+
+describe('simulationReducer — step (Story 3.3)', () => {
+  it('AC-3: dispatching step when paused advances grid by exactly one generation and increments genCount by 1', () => {
+    const next = simulationReducer(INITIAL_STATE, { type: 'step' });
+    expect(next.genCount).toBe(1);
+    expect(next.grid).not.toBe(INITIAL_STATE.grid);
+  });
+
+  it('AC-4: dispatching step when running returns state unchanged', () => {
+    const running = { ...INITIAL_STATE, running: true };
+    expect(simulationReducer(running, { type: 'step' })).toBe(running);
+  });
+});
+
 describe('simulationReducer — placeholder cases (no-op until later stories)', () => {
-  it('play, pause, tick, step, clear, randomize, setGenPerSec all return state unchanged', () => {
+  it('clear, randomize, setGenPerSec all return state unchanged', () => {
     const s = INITIAL_STATE;
-    expect(simulationReducer(s, { type: 'play' })).toBe(s);
-    expect(simulationReducer(s, { type: 'pause' })).toBe(s);
-    expect(simulationReducer(s, { type: 'tick' })).toBe(s);
-    expect(simulationReducer(s, { type: 'step' })).toBe(s);
     expect(simulationReducer(s, { type: 'clear' })).toBe(s);
     expect(simulationReducer(s, { type: 'randomize' })).toBe(s);
     expect(simulationReducer(s, { type: 'setGenPerSec', genPerSec: 30 })).toBe(

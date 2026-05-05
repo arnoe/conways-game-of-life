@@ -36,17 +36,6 @@
   overflow: auto;
 }
 
-.counter {
-  font-size: 1rem;
-  color: #cbd5e1;
-}
-
-.counter span[data-testid='gen-count'] {
-  font-weight: 600;
-  color: #22d3ee;
-  font-variant-numeric: tabular-nums;
-}
-
 @media (min-width: 640px) {
   .layout {
     flex-direction: row;
