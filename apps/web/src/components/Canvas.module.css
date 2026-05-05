@@ -1,0 +1,13 @@
+.canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: #0a0a0a;
+  border: 1px solid #1f1f1f;
+  border-radius: 0.25rem;
+}
+
+.canvas:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}

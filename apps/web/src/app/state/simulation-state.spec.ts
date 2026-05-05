@@ -79,10 +79,74 @@ describe('simulationReducer — setSize action (Story 3.1)', () => {
   });
 });
 
+describe('simulationReducer — toggleCell action (Story 3.2)', () => {
+  it('AC-1: toggleCell on a dead cell at (3, 5) makes it alive', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'toggleCell',
+      x: 3,
+      y: 5,
+    });
+    const idx = 5 * INITIAL_STATE.grid.width + 3;
+    expect(next.grid.cells[idx]).toBe(1);
+  });
+
+  it('AC-2: toggleCell twice on the same cell leaves it dead', () => {
+    const after1 = simulationReducer(INITIAL_STATE, {
+      type: 'toggleCell',
+      x: 3,
+      y: 5,
+    });
+    const after2 = simulationReducer(after1, {
+      type: 'toggleCell',
+      x: 3,
+      y: 5,
+    });
+    const idx = 5 * after2.grid.width + 3;
+    expect(after2.grid.cells[idx]).toBe(0);
+  });
+
+  it('AC-3: toggleCell when running=true returns state unchanged', () => {
+    const running = { ...INITIAL_STATE, running: true };
+    const next = simulationReducer(running, {
+      type: 'toggleCell',
+      x: 3,
+      y: 5,
+    });
+    expect(next).toBe(running);
+  });
+
+  it('toggleCell with x=-1 returns state unchanged', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'toggleCell',
+      x: -1,
+      y: 0,
+    });
+    expect(next).toBe(INITIAL_STATE);
+  });
+
+  it('toggleCell with x=width returns state unchanged', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'toggleCell',
+      x: INITIAL_STATE.dimensions.width,
+      y: 0,
+    });
+    expect(next).toBe(INITIAL_STATE);
+  });
+
+  it('toggleCell allocates a new Grid object (immutability invariant)', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'toggleCell',
+      x: 0,
+      y: 0,
+    });
+    expect(next.grid).not.toBe(INITIAL_STATE.grid);
+    expect(next.grid.cells).not.toBe(INITIAL_STATE.grid.cells);
+  });
+});
+
 describe('simulationReducer — placeholder cases (no-op until later stories)', () => {
-  it('toggleCell, play, pause, tick, step, clear, randomize, setGenPerSec all return state unchanged', () => {
+  it('play, pause, tick, step, clear, randomize, setGenPerSec all return state unchanged', () => {
     const s = INITIAL_STATE;
-    expect(simulationReducer(s, { type: 'toggleCell', x: 0, y: 0 })).toBe(s);
     expect(simulationReducer(s, { type: 'play' })).toBe(s);
     expect(simulationReducer(s, { type: 'pause' })).toBe(s);
     expect(simulationReducer(s, { type: 'tick' })).toBe(s);

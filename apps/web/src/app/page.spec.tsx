@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import Index from './page';
 import { CELL_SIZE } from './constants';
 
@@ -16,15 +16,9 @@ describe('page (Story 3.1) — initial render', () => {
     expect(screen.getByLabelText(/height/i)).toHaveValue(30);
   });
 
-  it('renders a canvas placeholder div sized to dimensions × CELL_SIZE', () => {
+  it('renders a canvas element (Story 3.2 wiring)', () => {
     render(<Index />);
-    const placeholder = screen.getByTestId('canvas-placeholder');
-    expect(placeholder).toBeInTheDocument();
-    const expected = 30 * CELL_SIZE;
-    expect(placeholder).toHaveStyle({
-      width: `${expected}px`,
-      height: `${expected}px`,
-    });
+    expect(screen.getByTestId('canvas')).toBeInTheDocument();
   });
 
   it('renders a generation counter showing 0', () => {
@@ -34,7 +28,7 @@ describe('page (Story 3.1) — initial render', () => {
 });
 
 describe('page (Story 3.1) — resize integration', () => {
-  it('AC-3: applying 50×40 updates the canvas placeholder dimensions', () => {
+  it('AC-3: applying 50×40 updates the canvas dimensions (CSS sized via grid × CELL_SIZE)', () => {
     render(<Index />);
     fireEvent.change(screen.getByLabelText(/width/i), {
       target: { value: '50' },
@@ -43,10 +37,51 @@ describe('page (Story 3.1) — resize integration', () => {
       target: { value: '40' },
     });
     fireEvent.click(screen.getByRole('button', { name: /apply/i }));
-    const placeholder = screen.getByTestId('canvas-placeholder');
-    expect(placeholder).toHaveStyle({
-      width: `${50 * CELL_SIZE}px`,
-      height: `${40 * CELL_SIZE}px`,
+    const canvas = screen.getByTestId('canvas') as HTMLCanvasElement;
+    expect(canvas.style.width).toBe(`${50 * CELL_SIZE}px`);
+    expect(canvas.style.height).toBe(`${40 * CELL_SIZE}px`);
+  });
+});
+
+describe('page (Story 3.2) — click toggles cells end-to-end', () => {
+  function mockRect(canvas: HTMLCanvasElement, dim: number) {
+    canvas.getBoundingClientRect = () =>
+      ({
+        left: 0,
+        top: 0,
+        width: dim * CELL_SIZE,
+        height: dim * CELL_SIZE,
+        right: dim * CELL_SIZE,
+        bottom: dim * CELL_SIZE,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect;
+  }
+
+  it('AC-1: pointerdown at (10, 10) when paused → fires onPointerDown so the page reducer toggles the cell', () => {
+    render(<Index />);
+    const canvas = screen.getByTestId('canvas') as HTMLCanvasElement;
+    mockRect(canvas, 30);
+
+    interface RecordedEvent {
+      type: string;
+    }
+    type Recordable = CanvasRenderingContext2D & {
+      __getEvents?: () => ReadonlyArray<RecordedEvent>;
+    };
+
+    // First click toggles (0,0) alive — produces an alive fillRect on next render.
+    act(() => {
+      fireEvent.pointerDown(canvas, { clientX: 10, clientY: 10 });
     });
+    const ctx = canvas.getContext('2d') as Recordable | null;
+    const events = ctx?.__getEvents?.() ?? [];
+    // Cumulative recorded fillRect events should now include at least one alive fill
+    // beyond the initial background fill — i.e., at least 3 (initial-bg + post-toggle-bg + alive).
+    const fillRectCount = events.filter(
+      (e: RecordedEvent) => e.type === 'fillRect',
+    ).length;
+    expect(fillRectCount).toBeGreaterThanOrEqual(3);
   });
 });

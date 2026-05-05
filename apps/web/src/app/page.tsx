@@ -1,8 +1,8 @@
 'use client';
 
 import { useReducer } from 'react';
+import { Canvas } from '../components/Canvas.js';
 import { GridSizeForm } from '../components/GridSizeForm.js';
-import { CELL_SIZE } from './constants.js';
 import {
   INITIAL_STATE,
   simulationReducer,
@@ -11,9 +11,6 @@ import styles from './page.module.css';
 
 export default function Index(): React.JSX.Element {
   const [state, dispatch] = useReducer(simulationReducer, INITIAL_STATE);
-
-  const cssWidth = state.dimensions.width * CELL_SIZE;
-  const cssHeight = state.dimensions.height * CELL_SIZE;
 
   return (
     <main className={styles.page}>
@@ -33,10 +30,12 @@ export default function Index(): React.JSX.Element {
           </div>
         </aside>
         <div className={styles.canvasArea}>
-          <div
-            data-testid="canvas-placeholder"
-            className={styles.canvasPlaceholder}
-            style={{ width: `${cssWidth}px`, height: `${cssHeight}px` }}
+          <Canvas
+            grid={state.grid}
+            running={state.running}
+            onToggleCell={(x, y) =>
+              dispatch({ type: 'toggleCell', x, y })
+            }
           />
         </div>
       </div>
