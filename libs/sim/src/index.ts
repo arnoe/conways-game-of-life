@@ -10,3 +10,4 @@ export {
   toggleCell,
 } from './lib/grid.js';
 export { step } from './lib/rules/conway.js';
+export { randomizeGrid } from './lib/randomize.js';
