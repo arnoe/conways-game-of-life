@@ -177,15 +177,48 @@ This approach is preferred over a "must-fail" test fixture because it keeps the 
 | `package.json` / `pnpm-lock.yaml` | possibly modified by generator (new dev-deps for `@nx/js`) |
 | `docs/implementation-artifacts/1-2-configure-nx-tags-and-prove-module-boundaries-fire.md` | this file — Dev appends Evidence section |
 
-## Evidence (to be filled in by Dev)
+## Evidence
 
-> Dev: paste the verbatim failing output of `pnpm nx lint sim` here after running the transient-fixture step. Format as a fenced code block. Do NOT commit the fixture itself; only the captured output. Also note the exact forbidden import line you used (e.g., `import '@cgol-scaffold/web';` in `libs/sim/src/index.ts`) and confirm the import was reverted before the final commit.
+Verbatim failing output of `pnpm nx lint @cgol-scaffold/sim` against the transient cross-lib violation fixture (a `@cgol-scaffold/web` import added to `libs/sim/src/lib/sim.ts`, plus a temporary `exports` field added to `apps/web/package.json` so Nx's project-graph resolver could match the import to the `apps/web` project — without it, Nx 22 silently skips the rule because `apps/web` does not yet expose an entry point):
 
 ```
-[paste failing lint output here]
+> nx run @cgol-scaffold/sim:lint
+
+> eslint .
+
+
+/Users/arnoe/workspace-designpickle/conways-game-of-life/.claude/worktrees/inspiring-euler-bb0ed0/libs/sim/jest.config.cts
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+/Users/arnoe/workspace-designpickle/conways-game-of-life/.claude/worktrees/inspiring-euler-bb0ed0/libs/sim/package.json
+  24:3  error  The "@cgol-scaffold/sim" project uses the following packages, but they are missing from "dependencies":
+    - @cgol-scaffold/web  @nx/dependency-checks
+
+/Users/arnoe/workspace-designpickle/conways-game-of-life/.claude/worktrees/inspiring-euler-bb0ed0/libs/sim/src/lib/sim.ts
+  4:1  error  A project tagged with "scope:sim" can only depend on libs tagged with "scope:types"  @nx/enforce-module-boundaries
+
+✖ 3 problems (2 errors, 1 warning)
+  1 error and 1 warning potentially fixable with the `--fix` option.
+
+Warning: command "eslint ." exited with non-zero status code
+
+
+ NX   Running target lint for project @cgol-scaffold/sim failed
+
+Failed tasks:
+
+- @cgol-scaffold/sim:lint
 ```
+
+The architecture §5.6 matrix permits `scope:sim → scope:types` only; the fixture's `scope:sim → scope:app` import is correctly rejected by `@nx/enforce-module-boundaries`. The companion `@nx/dependency-checks` error (missing `dependencies` entry) is incidental — the boundary rule itself is the load-bearing failure for this evidence.
 
 **Forbidden import used (reverted before commit):**
-`[paste the exact import line]`
+`import * as web from '@cgol-scaffold/web';` in `libs/sim/src/lib/sim.ts`
 
-**Confirmation of revert:** `git status libs/sim/src/index.ts` shows clean / `pnpm nx lint sim` passes again.
+**Companion transient edit (also reverted before commit):** added `"exports": { ".": "./src/app/page.tsx" }` to `apps/web/package.json` so Nx's `target-project-locator` could resolve the import to the `apps/web` project node. Without it the Nx 22 graph resolver returns `null` and the rule never fires (verified during the demonstration).
+
+**Confirmation of revert:**
+- `libs/sim/src/lib/sim.ts` is back to its generator-default contents (`export function sim(): string { return 'sim'; }`).
+- `apps/web/package.json` no longer contains the `exports` field.
+- `pnpm nx lint @cgol-scaffold/sim` passes (1 unrelated `Unused eslint-disable directive` warning in `jest.config.cts`, no errors).
+- `pnpm nx run-many -t lint` succeeds across all 3 projects.
