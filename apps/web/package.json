@@ -3,7 +3,18 @@
   "version": "0.0.1",
   "private": true,
   "nx": {
-    "tags": ["scope:app", "type:app"]
+    "tags": ["scope:app", "type:app"],
+    "targets": {
+      "typecheck": {
+        "command": "tsc --noEmit -p tsconfig.json",
+        "options": {
+          "cwd": "apps/web"
+        },
+        "cache": true,
+        "inputs": ["default", "^default"],
+        "dependsOn": ["^build"]
+      }
+    }
   },
   "dependencies": {
     "next": "~16.1.6",

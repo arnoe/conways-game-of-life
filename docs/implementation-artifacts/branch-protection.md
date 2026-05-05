@@ -50,12 +50,12 @@ gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
   /repos/{owner}/{repo}/branches/main/protection \
-  -f required_status_checks[strict]=true \
+  -F 'required_status_checks[strict]=true' \
   -f 'required_status_checks[contexts][]=lint' \
   -f 'required_status_checks[contexts][]=typecheck' \
   -f 'required_status_checks[contexts][]=test' \
   -f 'required_status_checks[contexts][]=e2e' \
-  -f enforce_admins=true \
+  -F enforce_admins=true \
   -F 'required_pull_request_reviews[required_approving_review_count]=1' \
   -f restrictions=
 ```
@@ -97,3 +97,9 @@ The companion workflow lives at `.github/workflows/auto-approve.yml`. It
 uses `hmarr/auto-approve-action@v4` and gates on
 `workflow_run.conclusion == 'success'` for the CI workflow. See the workflow
 file's header comment for the cross-fork PR caveat.
+
+**Bot-author caveat.** GitHub does not allow `secrets.GITHUB_TOKEN` to
+self-approve a PR authored by the same `github-actions[bot]` actor. PRs
+authored by a human (or by Claude Code, committing as `arnoe`) approve
+normally. If a future workflow opens PRs as `github-actions[bot]`, swap
+in a PAT with `repo` scope to enable approval.
