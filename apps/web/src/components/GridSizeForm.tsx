@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { MAX_DIM, MIN_DIM } from '../app/constants.js';
+import { MAX_DIM, MIN_DIM } from '../app/constants';
 import styles from './GridSizeForm.module.css';
 
 interface GridSizeFormProps {

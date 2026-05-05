@@ -27,7 +27,7 @@ import {
   MAX_GEN_PER_SEC,
   MIN_DIM,
   MIN_GEN_PER_SEC,
-} from '../constants.js';
+} from '../constants';
 
 export interface SimulationState {
   grid: Grid;

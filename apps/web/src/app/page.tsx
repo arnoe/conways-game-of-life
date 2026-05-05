@@ -1,15 +1,15 @@
 'use client';
 
 import { useReducer } from 'react';
-import { Canvas } from '../components/Canvas.js';
-import { Controls } from '../components/Controls.js';
-import { GridSizeForm } from '../components/GridSizeForm.js';
-import { SpeedSlider } from '../components/SpeedSlider.js';
-import { useSimulationLoop } from '../hooks/useSimulationLoop.js';
+import { Canvas } from '../components/Canvas';
+import { Controls } from '../components/Controls';
+import { GridSizeForm } from '../components/GridSizeForm';
+import { SpeedSlider } from '../components/SpeedSlider';
+import { useSimulationLoop } from '../hooks/useSimulationLoop';
 import {
   INITIAL_STATE,
   simulationReducer,
-} from './state/simulation-state.js';
+} from './state/simulation-state';
 import styles from './page.module.css';
 
 export default function Index(): React.JSX.Element {

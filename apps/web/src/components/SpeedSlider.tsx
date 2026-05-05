@@ -1,6 +1,6 @@
 'use client';
 
-import { MAX_GEN_PER_SEC, MIN_GEN_PER_SEC } from '../app/constants.js';
+import { MAX_GEN_PER_SEC, MIN_GEN_PER_SEC } from '../app/constants';
 import styles from './SpeedSlider.module.css';
 
 interface SpeedSliderProps {

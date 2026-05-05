@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type PointerEvent } from 'react';
 import type { Grid } from '@cgol-scaffold/sim';
-import { ALIVE_COLOR, CELL_SIZE, DEAD_COLOR } from '../app/constants.js';
+import { ALIVE_COLOR, CELL_SIZE, DEAD_COLOR } from '../app/constants';
 import styles from './Canvas.module.css';
 
 interface CanvasProps {
