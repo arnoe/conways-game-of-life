@@ -294,11 +294,67 @@ describe('simulationReducer — randomize (Story 3.4)', () => {
   });
 });
 
-describe('simulationReducer — placeholder cases (no-op until later stories)', () => {
-  it('setGenPerSec returns state unchanged', () => {
-    const s = INITIAL_STATE;
-    expect(simulationReducer(s, { type: 'setGenPerSec', genPerSec: 30 })).toBe(
-      s,
-    );
+describe('simulationReducer — setGenPerSec (Story 3.5)', () => {
+  it('AC-2: dispatching setGenPerSec with 30 sets state.genPerSec to 30', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'setGenPerSec',
+      genPerSec: 30,
+    });
+    expect(next.genPerSec).toBe(30);
+  });
+
+  it('clamps values below 1 to 1', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'setGenPerSec',
+      genPerSec: 0,
+    });
+    expect(next.genPerSec).toBe(1);
+  });
+
+  it('clamps values above 60 to 60', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'setGenPerSec',
+      genPerSec: 99,
+    });
+    expect(next.genPerSec).toBe(60);
+  });
+
+  it('rounds non-integer values to nearest integer', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'setGenPerSec',
+      genPerSec: 12.7,
+    });
+    expect(next.genPerSec).toBe(13);
+  });
+
+  it('rejects NaN (returns state unchanged)', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'setGenPerSec',
+      genPerSec: Number.NaN,
+    });
+    expect(next).toBe(INITIAL_STATE);
+  });
+
+  it('rejects Infinity (returns state unchanged)', () => {
+    const next = simulationReducer(INITIAL_STATE, {
+      type: 'setGenPerSec',
+      genPerSec: Number.POSITIVE_INFINITY,
+    });
+    expect(next).toBe(INITIAL_STATE);
+  });
+
+  it('does NOT modify running, grid, or genCount', () => {
+    const seeded = {
+      ...INITIAL_STATE,
+      running: true,
+      genCount: 5,
+    };
+    const next = simulationReducer(seeded, {
+      type: 'setGenPerSec',
+      genPerSec: 25,
+    });
+    expect(next.running).toBe(true);
+    expect(next.genCount).toBe(5);
+    expect(next.grid).toBe(seeded.grid);
   });
 });

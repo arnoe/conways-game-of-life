@@ -119,3 +119,64 @@ describe('useSimulationLoop — Story 3.5 hand-off (ref-fresh genPerSec)', () =>
     expect(callsAfterChange).toBeLessThanOrEqual(19);
   });
 });
+
+describe('useSimulationLoop — mid-run rate change (Story 3.5 — AC-1, AC-3)', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('AC-3: rerendering with a new genPerSec does NOT cause cancelAnimationFrame to fire', () => {
+    const cancelSpy = jest.spyOn(window, 'cancelAnimationFrame');
+    const onTick = jest.fn();
+    const { rerender } = renderHook(
+      (props: { running: boolean; genPerSec: number }) =>
+        useSimulationLoop({
+          running: props.running,
+          genPerSec: props.genPerSec,
+          onTick,
+        }),
+      { initialProps: { running: true, genPerSec: 10 } },
+    );
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    cancelSpy.mockClear();
+    rerender({ running: true, genPerSec: 30 });
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    expect(cancelSpy).not.toHaveBeenCalled();
+    cancelSpy.mockRestore();
+  });
+
+  it('AC-1: changing genPerSec from 10 to 30 mid-run changes the tick cadence on the next frame', () => {
+    const onTick = jest.fn();
+    const { rerender } = renderHook(
+      (props: { genPerSec: number }) =>
+        useSimulationLoop({
+          running: true,
+          genPerSec: props.genPerSec,
+          onTick,
+        }),
+      { initialProps: { genPerSec: 10 } },
+    );
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    const ticksAt10 = onTick.mock.calls.length;
+    rerender({ genPerSec: 30 });
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    const totalTicks = onTick.mock.calls.length;
+    // 5 + 15 = 20 (with ±4 tolerance for accumulator drift)
+    expect(totalTicks).toBeGreaterThanOrEqual(16);
+    expect(totalTicks).toBeLessThanOrEqual(24);
+    // After change, additional ticks should reflect 30 gen/sec, not 10.
+    const ticksAfter = totalTicks - ticksAt10;
+    expect(ticksAfter).toBeGreaterThanOrEqual(11);
+  });
+});

@@ -191,3 +191,45 @@ describe('page (Story 3.4) — Clear/Randomize integration', () => {
     }
   });
 });
+
+describe('page (Story 3.5) — slider integration', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('AC-2 + AC-3: dragging slider mid-run changes cadence and gen-count keeps increasing', () => {
+    render(<Index />);
+    fireEvent.click(screen.getByRole('button', { name: /play/i }));
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    const before = Number(
+      screen.getByTestId('gen-count').textContent ?? '0',
+    );
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '30' } });
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    const after = Number(screen.getByTestId('gen-count').textContent ?? '0');
+    expect(after).toBeGreaterThan(before);
+  });
+
+  it('AC-1: changing slider does not cancel-and-restart the rAF loop', () => {
+    const cancelSpy = jest.spyOn(window, 'cancelAnimationFrame');
+    render(<Index />);
+    fireEvent.click(screen.getByRole('button', { name: /play/i }));
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    cancelSpy.mockClear();
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '45' } });
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+    expect(cancelSpy).not.toHaveBeenCalled();
+    cancelSpy.mockRestore();
+  });
+});

@@ -24,7 +24,9 @@ import {
   DEFAULT_DIM,
   DEFAULT_GEN_PER_SEC,
   MAX_DIM,
+  MAX_GEN_PER_SEC,
   MIN_DIM,
+  MIN_GEN_PER_SEC,
 } from '../constants.js';
 
 export interface SimulationState {
@@ -115,9 +117,19 @@ export function simulationReducer(
         genCount: 0,
         running: false,
       };
-    // Implemented in story 3.5
-    case 'setGenPerSec':
-      return state;
+    case 'setGenPerSec': {
+      if (
+        typeof action.genPerSec !== 'number' ||
+        !Number.isFinite(action.genPerSec)
+      ) {
+        return state;
+      }
+      const clamped = Math.max(
+        MIN_GEN_PER_SEC,
+        Math.min(MAX_GEN_PER_SEC, Math.round(action.genPerSec)),
+      );
+      return { ...state, genPerSec: clamped };
+    }
     default: {
       const _exhaustive: never = action;
       void _exhaustive;

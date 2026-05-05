@@ -4,6 +4,7 @@ import { useReducer } from 'react';
 import { Canvas } from '../components/Canvas.js';
 import { Controls } from '../components/Controls.js';
 import { GridSizeForm } from '../components/GridSizeForm.js';
+import { SpeedSlider } from '../components/SpeedSlider.js';
 import { useSimulationLoop } from '../hooks/useSimulationLoop.js';
 import {
   INITIAL_STATE,
@@ -40,6 +41,12 @@ export default function Index(): React.JSX.Element {
             onStep={() => dispatch({ type: 'step' })}
             onClear={() => dispatch({ type: 'clear' })}
             onRandomize={() => dispatch({ type: 'randomize' })}
+          />
+          <SpeedSlider
+            genPerSec={state.genPerSec}
+            onChange={(genPerSec) =>
+              dispatch({ type: 'setGenPerSec', genPerSec })
+            }
           />
         </aside>
         <div className={styles.canvasArea}>
