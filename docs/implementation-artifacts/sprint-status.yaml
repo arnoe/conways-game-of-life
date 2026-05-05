@@ -51,12 +51,12 @@ development_status:
   2-4-randomize-with-injectable-rng-and-tests: done
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-page-shell-canvas-size-form-and-responsive-layout: backlog
-  3-2-canvas-render-and-click-tap-to-toggle-cells: backlog
-  3-3-play-pause-step-controls-and-generation-counter: backlog
-  3-4-clear-and-randomize-controls: backlog
-  3-5-speed-slider-with-raf-accumulator-mid-run-change-without-restart: backlog
+  epic-3: in-progress
+  3-1-page-shell-canvas-size-form-and-responsive-layout: ready-for-dev
+  3-2-canvas-render-and-click-tap-to-toggle-cells: ready-for-dev
+  3-3-play-pause-step-controls-and-generation-counter: ready-for-dev
+  3-4-clear-and-randomize-controls: ready-for-dev
+  3-5-speed-slider-with-raf-accumulator-mid-run-change-without-restart: ready-for-dev
   epic-3-retrospective: optional
 
   epic-4: backlog
