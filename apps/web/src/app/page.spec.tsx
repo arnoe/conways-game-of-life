@@ -141,3 +141,53 @@ describe('page (Story 3.3) — Play/Pause/Step integration', () => {
     expect(screen.getByRole('button', { name: /play/i })).toBeInTheDocument();
   });
 });
+
+describe('page (Story 3.4) — Clear/Randomize integration', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('AC-1: clicking Clear resets gen-count to 0', () => {
+    render(<Index />);
+    // Step a few times to drive gen-count up
+    fireEvent.click(screen.getByRole('button', { name: /step/i }));
+    fireEvent.click(screen.getByRole('button', { name: /step/i }));
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }));
+    expect(screen.getByTestId('gen-count')).toHaveTextContent('0');
+  });
+
+  it('AC-1: clicking Clear while running pauses the simulation', () => {
+    render(<Index />);
+    fireEvent.click(screen.getByRole('button', { name: /play/i }));
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }));
+    expect(
+      screen.getByRole('button', { name: /play/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('AC-2: clicking Randomize while running pauses and resets gen-count to 0', () => {
+    const spy = jest.spyOn(Math, 'random').mockReturnValue(0.1);
+    try {
+      render(<Index />);
+      fireEvent.click(screen.getByRole('button', { name: /play/i }));
+      act(() => {
+        jest.advanceTimersByTime(200);
+      });
+      fireEvent.click(
+        screen.getByRole('button', { name: /randomize/i }),
+      );
+      expect(screen.getByTestId('gen-count')).toHaveTextContent('0');
+      expect(
+        screen.getByRole('button', { name: /play/i }),
+      ).toBeInTheDocument();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});

@@ -8,6 +8,8 @@ interface ControlsProps {
   onPlay: () => void;
   onPause: () => void;
   onStep: () => void;
+  onClear: () => void;
+  onRandomize: () => void;
 }
 
 export function Controls({
@@ -16,6 +18,8 @@ export function Controls({
   onPlay,
   onPause,
   onStep,
+  onClear,
+  onRandomize,
 }: ControlsProps): React.JSX.Element {
   return (
     <div className={styles.controls}>
@@ -35,6 +39,20 @@ export function Controls({
         aria-disabled={running}
       >
         Step
+      </button>
+      <button
+        type="button"
+        className={styles.button}
+        onClick={onClear}
+      >
+        Clear
+      </button>
+      <button
+        type="button"
+        className={styles.button}
+        onClick={onRandomize}
+      >
+        Randomize
       </button>
       <div className={styles.counter}>
         <span>Generation: </span>

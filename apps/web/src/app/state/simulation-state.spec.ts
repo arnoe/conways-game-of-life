@@ -196,11 +196,107 @@ describe('simulationReducer — step (Story 3.3)', () => {
   });
 });
 
+describe('simulationReducer — clear (Story 3.4)', () => {
+  it('AC-1: dispatching clear with a non-empty grid produces an all-dead grid', () => {
+    const seeded = simulationReducer(INITIAL_STATE, {
+      type: 'toggleCell',
+      x: 0,
+      y: 0,
+    });
+    const cleared = simulationReducer(seeded, { type: 'clear' });
+    expect(cleared.grid.cells.every((c) => c === 0)).toBe(true);
+  });
+
+  it('AC-1: dispatching clear resets genCount to 0', () => {
+    const advanced = { ...INITIAL_STATE, genCount: 17 };
+    const cleared = simulationReducer(advanced, { type: 'clear' });
+    expect(cleared.genCount).toBe(0);
+  });
+
+  it('AC-1: dispatching clear when running=true sets running=false', () => {
+    const running = { ...INITIAL_STATE, running: true };
+    const cleared = simulationReducer(running, { type: 'clear' });
+    expect(cleared.running).toBe(false);
+  });
+
+  it('clear preserves grid dimensions', () => {
+    const cleared = simulationReducer(INITIAL_STATE, { type: 'clear' });
+    expect(cleared.grid.width).toBe(INITIAL_STATE.grid.width);
+    expect(cleared.grid.height).toBe(INITIAL_STATE.grid.height);
+  });
+
+  it('clear allocates a new Grid (immutability)', () => {
+    const cleared = simulationReducer(INITIAL_STATE, { type: 'clear' });
+    expect(cleared.grid).not.toBe(INITIAL_STATE.grid);
+  });
+});
+
+describe('simulationReducer — randomize (Story 3.4)', () => {
+  it('AC-2: dispatching randomize produces a non-empty grid (with all-cells-alive RNG mock)', () => {
+    const spy = jest.spyOn(Math, 'random').mockReturnValue(0.0);
+    try {
+      const next = simulationReducer(INITIAL_STATE, { type: 'randomize' });
+      expect(next.grid.cells.some((c) => c === 1)).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('AC-2: dispatching randomize resets genCount to 0', () => {
+    const spy = jest.spyOn(Math, 'random').mockReturnValue(0.5);
+    try {
+      const advanced = { ...INITIAL_STATE, genCount: 7 };
+      const next = simulationReducer(advanced, { type: 'randomize' });
+      expect(next.genCount).toBe(0);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('AC-2: dispatching randomize when running=true sets running=false', () => {
+    const spy = jest.spyOn(Math, 'random').mockReturnValue(0.5);
+    try {
+      const running = { ...INITIAL_STATE, running: true };
+      const next = simulationReducer(running, { type: 'randomize' });
+      expect(next.running).toBe(false);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('AC-2: dispatching randomize preserves grid dimensions', () => {
+    const spy = jest.spyOn(Math, 'random').mockReturnValue(0.5);
+    try {
+      const next = simulationReducer(INITIAL_STATE, { type: 'randomize' });
+      expect(next.grid.width).toBe(INITIAL_STATE.grid.width);
+      expect(next.grid.height).toBe(INITIAL_STATE.grid.height);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('randomize allocates a new Grid (immutability)', () => {
+    const spy = jest.spyOn(Math, 'random').mockReturnValue(0.5);
+    try {
+      const next = simulationReducer(INITIAL_STATE, { type: 'randomize' });
+      expect(next.grid).not.toBe(INITIAL_STATE.grid);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('randomize at density 0.3 with unmocked Math.random produces some-but-not-all alive cells', () => {
+    const next = simulationReducer(INITIAL_STATE, { type: 'randomize' });
+    const total = next.grid.cells.length;
+    const alive = next.grid.cells.reduce<number>((acc, c) => acc + c, 0);
+    expect(alive).toBeGreaterThan(0);
+    expect(alive).toBeLessThan(total);
+  });
+});
+
 describe('simulationReducer — placeholder cases (no-op until later stories)', () => {
-  it('clear, randomize, setGenPerSec all return state unchanged', () => {
+  it('setGenPerSec returns state unchanged', () => {
     const s = INITIAL_STATE;
-    expect(simulationReducer(s, { type: 'clear' })).toBe(s);
-    expect(simulationReducer(s, { type: 'randomize' })).toBe(s);
     expect(simulationReducer(s, { type: 'setGenPerSec', genPerSec: 30 })).toBe(
       s,
     );

@@ -11,8 +11,16 @@
  * from day one — Stories 3.2–3.5 *fill* cases, they never widen the union.
  */
 
-import { createGrid, step, toggleCell, type Grid } from '@cgol-scaffold/sim';
 import {
+  clearGrid,
+  createGrid,
+  randomizeGrid,
+  step,
+  toggleCell,
+  type Grid,
+} from '@cgol-scaffold/sim';
+import {
+  DEFAULT_DENSITY,
   DEFAULT_DIM,
   DEFAULT_GEN_PER_SEC,
   MAX_DIM,
@@ -93,10 +101,20 @@ export function simulationReducer(
         genCount: state.genCount + 1,
       };
     }
-    // Implemented in story 3.4
     case 'clear':
+      return {
+        ...state,
+        grid: clearGrid(state.grid),
+        genCount: 0,
+        running: false,
+      };
     case 'randomize':
-      return state;
+      return {
+        ...state,
+        grid: randomizeGrid(state.grid, DEFAULT_DENSITY),
+        genCount: 0,
+        running: false,
+      };
     // Implemented in story 3.5
     case 'setGenPerSec':
       return state;

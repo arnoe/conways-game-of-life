@@ -38,6 +38,8 @@ export default function Index(): React.JSX.Element {
             onPlay={() => dispatch({ type: 'play' })}
             onPause={() => dispatch({ type: 'pause' })}
             onStep={() => dispatch({ type: 'step' })}
+            onClear={() => dispatch({ type: 'clear' })}
+            onRandomize={() => dispatch({ type: 'randomize' })}
           />
         </aside>
         <div className={styles.canvasArea}>
