@@ -22,7 +22,7 @@ export function Controls({
   onRandomize,
 }: ControlsProps): React.JSX.Element {
   return (
-    <div className={styles.controls}>
+    <div className={styles.controls} data-testid="controls">
       <button
         type="button"
         className={styles.button}

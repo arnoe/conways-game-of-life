@@ -182,6 +182,13 @@ describe('Controls — Randomize button (Story 3.4)', () => {
   });
 });
 
+describe('Controls — wrapper testid (Story 4.3)', () => {
+  it('controls root wrapper has data-testid="controls" for layout-locator stability', () => {
+    renderControls();
+    expect(screen.getByTestId('controls')).toBeInTheDocument();
+  });
+});
+
 describe('Controls — Tab order', () => {
   it('Tab order is Play/Pause → Step → Clear → Randomize', () => {
     const { container } = renderControls();

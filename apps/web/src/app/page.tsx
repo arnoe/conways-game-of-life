@@ -25,7 +25,7 @@ export default function Index(): React.JSX.Element {
     <main className={styles.page}>
       <h1 className={styles.heading}>Conway&apos;s Game of Life</h1>
       <div className={styles.layout}>
-        <aside className={styles.sidebar}>
+        <div className={styles.formArea}>
           <GridSizeForm
             width={state.dimensions.width}
             height={state.dimensions.height}
@@ -33,6 +33,17 @@ export default function Index(): React.JSX.Element {
               dispatch({ type: 'setSize', width, height })
             }
           />
+        </div>
+        <div className={styles.canvasArea}>
+          <Canvas
+            grid={state.grid}
+            running={state.running}
+            onToggleCell={(x, y) =>
+              dispatch({ type: 'toggleCell', x, y })
+            }
+          />
+        </div>
+        <div className={styles.controlsArea}>
           <Controls
             running={state.running}
             genCount={state.genCount}
@@ -46,15 +57,6 @@ export default function Index(): React.JSX.Element {
             genPerSec={state.genPerSec}
             onChange={(genPerSec) =>
               dispatch({ type: 'setGenPerSec', genPerSec })
-            }
-          />
-        </aside>
-        <div className={styles.canvasArea}>
-          <Canvas
-            grid={state.grid}
-            running={state.running}
-            onToggleCell={(x, y) =>
-              dispatch({ type: 'toggleCell', x, y })
             }
           />
         </div>
