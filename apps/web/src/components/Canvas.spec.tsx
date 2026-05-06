@@ -196,3 +196,36 @@ describe('Canvas — touch-scroll friendliness', () => {
     expect(canvas.style.touchAction).toBe('none');
   });
 });
+
+describe('Canvas — a11y (Story 4.2)', () => {
+  it('AC-5: canvas exposes aria-describedby="canvas-help"', () => {
+    const grid = createGrid(10, 10);
+    render(
+      <Canvas grid={grid} running={false} onToggleCell={() => undefined} />,
+    );
+    const canvas = screen.getByTestId('canvas');
+    expect(canvas).toHaveAttribute('aria-describedby', 'canvas-help');
+  });
+
+  it('AC-5: canvas help text is in the DOM and explains mouse-only interaction', () => {
+    const grid = createGrid(10, 10);
+    render(
+      <Canvas grid={grid} running={false} onToggleCell={() => undefined} />,
+    );
+    const help = document.getElementById('canvas-help');
+    expect(help).not.toBeNull();
+    expect(help?.textContent ?? '').toMatch(/click or tap cells/i);
+    expect(help?.textContent ?? '').toMatch(
+      /keyboard cell-painting is not supported/i,
+    );
+  });
+
+  it('AC-5: canvas help text uses the visually-hidden .srOnly class', () => {
+    const grid = createGrid(10, 10);
+    render(
+      <Canvas grid={grid} running={false} onToggleCell={() => undefined} />,
+    );
+    const help = document.getElementById('canvas-help');
+    expect(help?.className ?? '').toMatch(/srOnly/);
+  });
+});

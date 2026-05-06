@@ -65,13 +65,20 @@ export function Canvas({
   };
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={styles.canvas}
-      style={{ touchAction: 'none' }}
-      onPointerDown={handlePointerDown}
-      aria-label="Conway grid (click cells to toggle alive/dead)"
-      data-testid="canvas"
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className={styles.canvas}
+        style={{ touchAction: 'none' }}
+        onPointerDown={handlePointerDown}
+        aria-label="Conway grid (click cells to toggle alive/dead)"
+        aria-describedby="canvas-help"
+        data-testid="canvas"
+      />
+      <p id="canvas-help" className={styles.srOnly}>
+        Click or tap cells on the grid to toggle them between alive and dead.
+        Keyboard cell-painting is not supported in this version.
+      </p>
+    </>
   );
 }

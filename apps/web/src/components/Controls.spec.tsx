@@ -194,3 +194,85 @@ describe('Controls — Tab order', () => {
     ]);
   });
 });
+
+/**
+ * Story 4.2 — keyboard activation. jsdom does NOT translate Enter/Space
+ * keydown into a click event the way real browsers do for native
+ * `<button type="button">` elements. We verify two things in jsdom:
+ *  1. Each control is a real `<button type="button">` (HTML spec then
+ *     guarantees native Enter/Space activation in any conformant UA).
+ *  2. The handler fires when a click is dispatched (which is what the
+ *     browser synthesizes when the user presses Enter or Space on a
+ *     focused button).
+ * The actual key-press is exercised end-to-end in
+ * `apps/web-e2e/src/e2e/keyboard.spec.ts` against real Chromium.
+ */
+describe('Controls — keyboard activation (Story 4.2)', () => {
+  function activateViaEnterAndSpace(button: HTMLElement): void {
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    // Real-browser Enter/Space on a button → synthesized click.
+    fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' });
+    fireEvent.keyDown(button, { key: ' ', code: 'Space' });
+    fireEvent.click(button);
+  }
+
+  it('AC-2: every control is a real <button type="button"> (HTML-native Enter/Space)', () => {
+    renderControls();
+    for (const name of [/^play$/i, /^step$/i, /^clear$/i, /^randomize$/i]) {
+      const btn = screen.getByRole('button', { name });
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.getAttribute('type')).toBe('button');
+    }
+  });
+
+  it('AC-2: Play activates on Enter/Space', () => {
+    const onPlay = jest.fn();
+    renderControls({ onPlay });
+    activateViaEnterAndSpace(screen.getByRole('button', { name: /^play$/i }));
+    expect(onPlay).toHaveBeenCalled();
+  });
+
+  it('AC-2: Pause activates on Enter/Space', () => {
+    const onPause = jest.fn();
+    renderControls({ running: true, onPause });
+    activateViaEnterAndSpace(
+      screen.getByRole('button', { name: /^pause$/i }),
+    );
+    expect(onPause).toHaveBeenCalled();
+  });
+
+  it('AC-2: Step activates on Enter/Space when not running', () => {
+    const onStep = jest.fn();
+    renderControls({ onStep });
+    activateViaEnterAndSpace(screen.getByRole('button', { name: /^step$/i }));
+    expect(onStep).toHaveBeenCalled();
+  });
+
+  it('AC-2: Step does NOT activate when running (disabled)', () => {
+    const onStep = jest.fn();
+    renderControls({ running: true, onStep });
+    const stepBtn = screen.getByRole('button', { name: /^step$/i });
+    expect(stepBtn).toBeDisabled();
+    fireEvent.click(stepBtn);
+    expect(onStep).not.toHaveBeenCalled();
+  });
+
+  it('AC-2: Clear activates on Enter/Space', () => {
+    const onClear = jest.fn();
+    renderControls({ onClear });
+    activateViaEnterAndSpace(
+      screen.getByRole('button', { name: /^clear$/i }),
+    );
+    expect(onClear).toHaveBeenCalled();
+  });
+
+  it('AC-2: Randomize activates on Enter/Space', () => {
+    const onRandomize = jest.fn();
+    renderControls({ onRandomize });
+    activateViaEnterAndSpace(
+      screen.getByRole('button', { name: /^randomize$/i }),
+    );
+    expect(onRandomize).toHaveBeenCalled();
+  });
+});

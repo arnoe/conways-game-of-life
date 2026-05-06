@@ -60,4 +60,9 @@ describe('SpeedSlider — accessibility baseline', () => {
     const slider = screen.getByRole('slider') as HTMLInputElement;
     expect(slider.tabIndex).toBeGreaterThanOrEqual(0);
   });
+
+  // Story 4.2: ArrowLeft/ArrowRight on `<input type="range">` is browser-native
+  // and not reliably simulated by jsdom. The end-to-end verification of
+  // arrow-key cadence change lives in `apps/web-e2e/src/e2e/keyboard.spec.ts`,
+  // which runs against real Chromium.
 });

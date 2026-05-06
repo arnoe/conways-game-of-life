@@ -192,6 +192,43 @@ describe('page (Story 3.4) — Clear/Randomize integration', () => {
   });
 });
 
+describe('page — accessible-name audit (Story 4.2 AC-5)', () => {
+  it('AC-5: all 8 interactive controls are findable by accessible name in one render', () => {
+    render(<Index />);
+    // Heading
+    expect(
+      screen.getByRole('heading', { level: 1, name: /conway/i }),
+    ).toBeInTheDocument();
+    // Width / Height labels
+    expect(screen.getByLabelText(/width/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/height/i)).toBeInTheDocument();
+    // Apply
+    expect(
+      screen.getByRole('button', { name: /apply/i }),
+    ).toBeInTheDocument();
+    // Play (initial state)
+    expect(
+      screen.getByRole('button', { name: /^play$/i }),
+    ).toBeInTheDocument();
+    // Step
+    expect(
+      screen.getByRole('button', { name: /^step$/i }),
+    ).toBeInTheDocument();
+    // Clear
+    expect(
+      screen.getByRole('button', { name: /^clear$/i }),
+    ).toBeInTheDocument();
+    // Randomize
+    expect(
+      screen.getByRole('button', { name: /^randomize$/i }),
+    ).toBeInTheDocument();
+    // Speed slider
+    expect(
+      screen.getByRole('slider', { name: /simulation speed/i }),
+    ).toBeInTheDocument();
+  });
+});
+
 describe('page (Story 3.5) — slider integration', () => {
   beforeEach(() => {
     jest.useFakeTimers();
